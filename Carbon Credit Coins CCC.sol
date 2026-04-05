@@ -38,7 +38,7 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
     uint8 private constant TOKEN_DECIMALS = 18;
 
     uint256 public constant MAX_SUPPLY = 20_000_000_000 * 10**18;
-    uint256 public constant USD_REFERENCE_PER_CCC_6 = 1_000_000; // US$1.00
+    uint256 public constant USD_REFERENCE_PER_CCC_6 = 1_000_000; // US$1.00 com 6 casas
     uint256 public constant KG_CO2_PER_CCC = 164;
     uint256 public constant KG_PER_TON = 1000;
 
@@ -271,7 +271,7 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
             maturityText: "",
             declaredBackingUSD_6: 20_000_000_000 * 1_000_000,
             declaredCarbonKg: 20_000_000_000 * 164,
-            declaredCarbonTons_3: (20_000_000_000 * 164 * 1000) / 1000,
+            declaredCarbonTons_3: 20_000_000_000 * 164,
             declaredCustodyActive: false,
             declaredAuditActive: false,
             declaredValidationActive: false,
@@ -327,9 +327,11 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
         address previousTreasury = treasury;
         treasury = newTreasury;
         _grantRole(TREASURY_ROLE, newTreasury);
+
         if (previousTreasury != newTreasury) {
             _revokeRole(TREASURY_ROLE, previousTreasury);
         }
+
         emit TreasuryUpdated(previousTreasury, newTreasury);
     }
 
@@ -337,9 +339,11 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
         address previousOperator = operator;
         operator = newOperator;
         _grantRole(OPERATOR_ROLE, newOperator);
+
         if (previousOperator != newOperator) {
             _revokeRole(OPERATOR_ROLE, previousOperator);
         }
+
         emit OperatorUpdated(previousOperator, newOperator);
     }
 
@@ -366,15 +370,15 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
     // ECONOMIC MODEL
     // =========================================================
     function cccToUsdReference6(uint256 cccAmount18) public pure returns (uint256) {
-        return (cccAmount18 / 1e18) * USD_REFERENCE_PER_CCC_6;
+        return (cccAmount18 * USD_REFERENCE_PER_CCC_6) / 1e18;
     }
 
     function usdReference6ToCcc(uint256 usdAmount6) public pure returns (uint256) {
-        return usdAmount6 * 1e18 / USD_REFERENCE_PER_CCC_6;
+        return (usdAmount6 * 1e18) / USD_REFERENCE_PER_CCC_6;
     }
 
     function cccToCarbonKg(uint256 cccAmount18) public pure returns (uint256) {
-        return (cccAmount18 / 1e18) * KG_CO2_PER_CCC;
+        return (cccAmount18 * KG_CO2_PER_CCC) / 1e18;
     }
 
     function carbonKgToCcc(uint256 carbonKg) public pure returns (uint256) {
@@ -552,7 +556,12 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
     // =========================================================
     // EXTERNAL TOKENS / CONTRACTS / WATCHED
     // =========================================================
-    function addExternalToken(address token_, string calldata standard_, string calldata label_, bool active_)
+    function addExternalToken(
+        address token_,
+        string memory standard_,
+        string memory label_,
+        bool active_
+    )
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
         validAddress(token_)
@@ -578,7 +587,12 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
         }
     }
 
-    function addExternalContract(address contractAddress_, string calldata label_, string calldata contractType_, bool active_)
+    function addExternalContract(
+        address contractAddress_,
+        string memory label_,
+        string memory contractType_,
+        bool active_
+    )
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
         validAddress(contractAddress_)
@@ -604,7 +618,12 @@ contract CarbonCreditCoinSupreme is ERC20, ERC20Burnable, AccessControl, Pausabl
         }
     }
 
-    function addWatchedAddress(address account_, string calldata label_, string calldata category_, bool active_)
+    function addWatchedAddress(
+        address account_,
+        string memory label_,
+        string memory category_,
+        bool active_
+    )
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
         validAddress(account_)
